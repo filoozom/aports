@@ -1,5 +1,9 @@
+_apk_fetch() {
+        apk fetch --root "$APKROOT" "$@"
+}
+
 build_rpi_blobs() {
-	apk fetch --quiet --stdout raspberrypi-bootloader | tar -C "${DESTDIR}" -zx --strip=1 boot/
+	_apk_fetch --quiet --stdout raspberrypi-bootloader | tar -C "${DESTDIR}" -zx --strip=1 boot/
 }
 
 rpi_gen_cmdline() {
@@ -96,9 +100,9 @@ profile_rpi() {
 build_uboot() {
 	set -x
 	# FIXME: Fix apk-tools to extract packages directly
-	local pkg pkgs="$(apk fetch  --simulate --root "$APKROOT" --recursive u-boot-all | sed -ne "s/^Downloading \(.*\)\-[0-9].*$/\1/p")"
+	local pkg pkgs="$(_apk_fetch --simulate --recursive u-boot-all | sed -ne "s/^Downloading \(.*\)\-[0-9].*$/\1/p")"
 	for pkg in $pkgs; do
-		[ "$pkg" = "u-boot-all" ] || apk fetch --root "$APKROOT" --stdout $pkg | tar -C "$DESTDIR" -xz usr
+		[ "$pkg" = "u-boot-all" ] || _apk_fetch --stdout $pkg | tar -C "$DESTDIR" -xz usr
 	done
 	mkdir -p "$DESTDIR"/u-boot
 	mv "$DESTDIR"/usr/sbin/update-u-boot "$DESTDIR"/usr/share/u-boot/* "$DESTDIR"/u-boot
@@ -107,7 +111,7 @@ build_uboot() {
 
 section_uboot() {
 	[ -n "$uboot_install" ] || return 0
-	build_section uboot $ARCH $(apk fetch --root "$APKROOT" --simulate --recursive u-boot-all | sort | checksum)
+	build_section uboot $ARCH $(_apk_fetch --simulate --recursive u-boot-all | sort | checksum)
 }
 
 profile_uboot() {

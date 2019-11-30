@@ -261,6 +261,7 @@ for ARCH in $req_arch; do
 		# create root for caching packages
 		mkdir -p "$APKROOT/etc/apk/cache"
 		cp -Pr /etc/apk/keys "$APKROOT/etc/apk/"
+		cp /usr/share/apk/keys/*.pub "$APKROOT/etc/apk/keys/"
 		abuild-apk --arch "$ARCH" --root "$APKROOT" add --initdb
 
 		if [ -z "$REPOS" ]; then
